@@ -39,6 +39,8 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sangcomz.fishbun.imagepreview.ImageInfoItem;
+import com.sangcomz.fishbun.imagepreview.ImagesPreviewFragment;
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
@@ -60,6 +62,7 @@ import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main Activity to display albums and media content (images/videos) in each album
@@ -92,6 +95,8 @@ public class MatisseActivity extends AppCompatActivity implements
     private LinearLayout mOriginalLayout;
     private CheckRadioView mOriginal;
     private boolean mOriginalEnable;
+
+    private Fragment mPreviewFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -153,6 +158,14 @@ public class MatisseActivity extends AppCompatActivity implements
         mAlbumCollection.onCreate(this, this);
         mAlbumCollection.onRestoreInstanceState(savedInstanceState);
         mAlbumCollection.loadAlbums();
+
+        List<ImageInfoItem> list = new ArrayList<ImageInfoItem>();
+        for (int i = 0; i < 5; i++) {
+            list.add(new ImageInfoItem(null, null, null, null));
+        }
+        mPreviewFragment = ImagesPreviewFragment.newInstance(mSelectedCollection, "");
+        getSupportFragmentManager().beginTransaction().add(
+                R.id.fl_image_preview, mPreviewFragment).commit();
     }
 
     @Override

@@ -35,6 +35,7 @@ import com.zhihu.matisse.internal.model.SelectedItemCollection;
 import com.zhihu.matisse.internal.ui.adapter.AlbumMediaAdapter;
 import com.zhihu.matisse.internal.ui.widget.MediaGridInset;
 import com.zhihu.matisse.internal.utils.UIUtils;
+import com.zhihu.matisse.ui.imagepreview.SelectChangedNotifier;
 
 public class MediaSelectionFragment extends Fragment implements
         AlbumMediaCollection.AlbumMediaCallbacks, AlbumMediaAdapter.CheckStateListener,
@@ -111,6 +112,13 @@ public class MediaSelectionFragment extends Fragment implements
         mRecyclerView.setAdapter(mAdapter);
         mAlbumMediaCollection.onCreate(getActivity(), this);
         mAlbumMediaCollection.load(album, selectionSpec.capture);
+
+        mSelectionProvider.provideSelectedItemCollection().addChangedListener(new SelectChangedNotifier() {
+            @Override
+            public void onChanged() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

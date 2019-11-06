@@ -27,6 +27,7 @@ import com.zhihu.matisse.internal.entity.SelectionSpec;
 import com.zhihu.matisse.internal.ui.widget.CheckView;
 import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
+import com.zhihu.matisse.ui.imagepreview.SelectChangedNotifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -57,6 +58,11 @@ public class SelectedItemCollection {
     private final Context mContext;
     private Set<Item> mItems;
     private int mCollectionType = COLLECTION_UNDEFINED;
+    private ArrayList<SelectChangedNotifier> listeners = new ArrayList();
+
+    public void addChangedListener(SelectChangedNotifier listener) {
+        listeners.add(listener);
+    }
 
     public SelectedItemCollection(Context context) {
         mContext = context;
@@ -109,6 +115,9 @@ public class SelectedItemCollection {
                     mCollectionType = COLLECTION_MIXED;
                 }
             }
+            for (SelectChangedNotifier it : listeners) {
+                it.onChanged();
+            }
         }
         return added;
     }
@@ -122,6 +131,9 @@ public class SelectedItemCollection {
                 if (mCollectionType == COLLECTION_MIXED) {
                     refineCollectionType();
                 }
+            }
+            for (SelectChangedNotifier it : listeners) {
+                it.onChanged();
             }
         }
         return removed;
@@ -202,7 +214,7 @@ public class SelectedItemCollection {
     }
 
     // depends
-    private int currentMaxSelectable() {
+    public int currentMaxSelectable() {
         SelectionSpec spec = SelectionSpec.getInstance();
         if (spec.maxSelectable > 0) {
             return spec.maxSelectable;

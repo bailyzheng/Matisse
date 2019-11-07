@@ -108,14 +108,21 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.dracula:
                 Matisse.from(SampleActivity.this)
-                        .choose(MimeType.ofImage())
-                        .theme(R.style.Matisse_Dracula)
-                        .countable(false)
+                        .choose(MimeType.ofImage(), false)
+                        .theme(R.style.Matisse_Black)
+                        .countable(true)
                         .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                         .maxSelectable(9)
-                        .originalEnable(true)
                         .maxOriginalSize(10)
-                        .imageEngine(new PicassoEngine())
+                        .showSingleMediaType(true)
+                        .imageEngine(new GlideEngine())
+                        .originalEnable(false)
+                        .spanCount(4)
+                        .defApplyText("生成")
+                        .applyText("生成")
+                        .autoHideToolbarOnSingleTap(true)
+                        .forceSelectFull(true)
+                        .unSelectFullHint("你需要选择12张图片")
                         .forResult(REQUEST_CODE_CHOOSE);
                 break;
             case R.id.only_gif:

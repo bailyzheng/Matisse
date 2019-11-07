@@ -1,15 +1,11 @@
-package com.sangcomz.fishbun.imagepreview
+package com.zhihu.matisse.ui.imagepreview
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.net.Uri
 import android.os.Handler
-import android.os.Message
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -22,14 +18,12 @@ import com.zhihu.matisse.R
 import com.zhihu.matisse.internal.model.SelectedItemCollection
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.IItemTouchHelperAdapter
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.OnStartDragListener
-import java.io.File
-import java.util.*
 
-class ImageRVAdapter(val activity: Activity, val mSelectedCollection: SelectedItemCollection, val dragListener: OnStartDragListener, val handler: Handler?) : RecyclerView.Adapter<ImageRVAdapter.ImageHolder>(), IItemTouchHelperAdapter {
+class ImageRVAdapter(val activity: Activity, private val mSelectedCollection: SelectedItemCollection, val dragListener: OnStartDragListener, val handler: Handler?) : RecyclerView.Adapter<ImageRVAdapter.ImageHolder>(), IItemTouchHelperAdapter {
     val TAG = ImageRVAdapter::class.java.simpleName
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
-        return ImageHolder(LayoutInflater.from(activity).inflate(R.layout.item_image, parent, false))
+        return ImageHolder(LayoutInflater.from(activity).inflate(R.layout.item_image_matisse, parent, false))
     }
 
     override fun getItemCount(): Int {
@@ -52,6 +46,11 @@ class ImageRVAdapter(val activity: Activity, val mSelectedCollection: SelectedIt
             Log.v(TAG, "item != null")
             Glide.with(activity)
                     .load(item.uri)
+                    .apply(options)
+                    .into(holder.imageView)
+        } else if (position == mSelectedCollection.count()) {
+            Glide.with(activity)
+                    .load(R.drawable.bg_to_choose_next)
                     .apply(options)
                     .into(holder.imageView)
         } else {
@@ -103,8 +102,8 @@ class ImageRVAdapter(val activity: Activity, val mSelectedCollection: SelectedIt
     }
 
     class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var imageView: ImageView = itemView.findViewById(R.id.image)
-        var btnDel: ImageView = itemView.findViewById(R.id.iv_del)
+        var imageView: ImageView = itemView.findViewById(R.id.iv_selected_image)
+        var btnDel: ImageView = itemView.findViewById(R.id.iv_selected_del)
         var tvIndexView: TextView = itemView.findViewById(R.id.tv_index)
     }
 

@@ -57,6 +57,10 @@ public final class SelectionSpec {
     public int originalMaxSize;
     public OnCheckedListener onCheckedListener;
     public boolean showPreview;
+    public boolean forceSelectFull;
+    public String unSelectFullHint;
+    public String defApplyText;
+    public String applyText;
 
     private SelectionSpec() {
     }
@@ -93,6 +97,10 @@ public final class SelectionSpec {
         autoHideToobar = false;
         originalMaxSize = Integer.MAX_VALUE;
         showPreview = true;
+        defApplyText = "Apply";
+        applyText = "Apply(%1$d)";
+        forceSelectFull = false;
+        unSelectFullHint = "You need to select " + maxSelectable + " items";
     }
 
     public boolean singleSelectionModeEnabled() {

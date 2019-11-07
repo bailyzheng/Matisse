@@ -343,6 +343,26 @@ public final class SelectionCreator {
         return this;
     }
 
+    public SelectionCreator defApplyText(String text) {
+        mSelectionSpec.defApplyText = text;
+        return this;
+    }
+
+    public SelectionCreator applyText(String text) {
+        mSelectionSpec.applyText = text;
+        return this;
+    }
+
+    public SelectionCreator forceSelectFull(Boolean force) {
+        mSelectionSpec.forceSelectFull = force;
+        return this;
+    }
+
+    public SelectionCreator unSelectFullHint(String hint) {
+        mSelectionSpec.unSelectFullHint = hint;
+        return this;
+    }
+
     /**
      * Start to select media and wait for result.
      *

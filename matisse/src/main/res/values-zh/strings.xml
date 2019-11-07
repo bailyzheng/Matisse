@@ -20,6 +20,7 @@
     <string name="button_preview">预览</string>
     <string name="button_apply_default">使用</string>
     <string name="button_apply">使用(%1$d)</string>
+    <string name="text_select_hint">请选择%1$d个素材</string>
     <string name="button_back">返回</string>
     <string name="photo_grid_capture">拍一张</string>
     <string name="empty_text">还没有图片或视频</string>

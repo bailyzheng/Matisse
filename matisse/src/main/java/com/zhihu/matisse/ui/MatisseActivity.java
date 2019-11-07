@@ -38,9 +38,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.sangcomz.fishbun.imagepreview.ImageInfoItem;
-import com.sangcomz.fishbun.imagepreview.ImagesPreviewFragment;
+import com.zhihu.matisse.ui.imagepreview.ImageInfoItem;
+import com.zhihu.matisse.ui.imagepreview.ImagesPreviewFragment;
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
@@ -61,6 +62,8 @@ import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
+import com.zhihu.matisse.ui.imagepreview.SelectChangedNotifier;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +91,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private AlbumsSpinner mAlbumsSpinner;
     private AlbumsAdapter mAlbumsAdapter;
     private TextView mButtonPreview;
+    private TextView mSelectHint;
     private TextView mButtonApply;
     private View mContainer;
     private View mEmptyView;
@@ -134,6 +138,7 @@ public class MatisseActivity extends AppCompatActivity implements
         navigationIcon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
+        mSelectHint = (TextView) findViewById(R.id.tv_select_hint);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
         mButtonPreview.setOnClickListener(this);
         mButtonApply.setOnClickListener(this);
@@ -148,6 +153,17 @@ public class MatisseActivity extends AppCompatActivity implements
             mOriginalEnable = savedInstanceState.getBoolean(CHECK_STATE);
         }
         updateBottomToolbar();
+
+        mSelectHint.setText(getString(R.string.text_select_hint, mSpec.maxSelectable));
+        mSelectedCollection.addChangedListener(
+                () -> {
+                    if (mSelectedCollection.count() > 0) {
+                        mSelectHint.setText(mSelectedCollection.count() + " / " + mSpec.maxSelectable);
+                    } else {
+                        mSelectHint.setText(getString(R.string.text_select_hint, mSpec.maxSelectable));
+                    }
+                }
+        );
 
         mAlbumsAdapter = new AlbumsAdapter(this, null, false);
         mAlbumsSpinner = new AlbumsSpinner(this);
@@ -266,15 +282,15 @@ public class MatisseActivity extends AppCompatActivity implements
         if (selectedCount == 0) {
             mButtonPreview.setEnabled(false);
             mButtonApply.setEnabled(false);
-            mButtonApply.setText(getString(R.string.button_apply_default));
+            mButtonApply.setText(mSpec.defApplyText);
         } else if (selectedCount == 1 && mSpec.singleSelectionModeEnabled()) {
             mButtonPreview.setEnabled(true);
-            mButtonApply.setText(R.string.button_apply_default);
+            mButtonApply.setText(mSpec.defApplyText);
             mButtonApply.setEnabled(true);
         } else {
             mButtonPreview.setEnabled(true);
             mButtonApply.setEnabled(true);
-            mButtonApply.setText(getString(R.string.button_apply, selectedCount));
+            mButtonApply.setText(String.format(mSpec.applyText, selectedCount));
         }
 
 
@@ -282,9 +298,8 @@ public class MatisseActivity extends AppCompatActivity implements
             mOriginalLayout.setVisibility(View.VISIBLE);
             updateOriginalState();
         } else {
-            mOriginalLayout.setVisibility(View.INVISIBLE);
+            mOriginalLayout.setVisibility(View.GONE);
         }
-
 
     }
 
@@ -330,6 +345,10 @@ public class MatisseActivity extends AppCompatActivity implements
             intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             startActivityForResult(intent, REQUEST_CODE_PREVIEW);
         } else if (v.getId() == R.id.button_apply) {
+            if (mSpec.forceSelectFull && !mSelectedCollection.maxSelectableReached()) {
+                Toast.makeText(this, mSpec.unSelectFullHint, Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent result = new Intent();
             ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
             result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);

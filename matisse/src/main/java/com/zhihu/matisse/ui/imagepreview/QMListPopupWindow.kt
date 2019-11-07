@@ -1,4 +1,4 @@
-package com.sangcomz.fishbun.imagepreview
+package com.zhihu.matisse.ui.imagepreview
 
 import android.content.Context
 import android.graphics.Color
@@ -23,7 +23,7 @@ class QMListPopupWindow(protected var context: Context, val topWindow: Window, v
     lateinit var dataList: ListView
 
     init {
-        contentView = LayoutInflater.from(context).inflate(R.layout.popup_list, null)
+        contentView = LayoutInflater.from(context).inflate(R.layout.popup_list_matisse, null)
         initView()
         initEvent()
         contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
@@ -35,7 +35,7 @@ class QMListPopupWindow(protected var context: Context, val topWindow: Window, v
     fun initView() {
         val view = contentView
         dataList = view.findViewById(R.id.data_list) as ListView
-        dataList.adapter = ArrayAdapter(context, R.layout.item_popup_list, datas)
+        dataList.adapter = ArrayAdapter(context, R.layout.item_popup_list_matisse, datas)
     }
     fun initEvent() {
         dataList.onItemClickListener = listener

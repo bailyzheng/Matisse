@@ -1,31 +1,22 @@
-package com.sangcomz.fishbun.imagepreview
+package com.zhihu.matisse.ui.imagepreview
 
-import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
-import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.R
 import com.zhihu.matisse.internal.model.SelectedItemCollection
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.MyItemTouchHelperCallback
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.OnStartDragListener
-import com.zhihu.matisse.ui.imagepreview.SelectChangedNotifier
-import java.io.File
 import java.io.Serializable
 
 private const val ARG_LIST = "param1"

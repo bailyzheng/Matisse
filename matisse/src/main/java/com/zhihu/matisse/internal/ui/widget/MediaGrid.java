@@ -40,6 +40,8 @@ public class MediaGrid extends SquareFrameLayout implements View.OnClickListener
     private PreBindInfo mPreBindInfo;
     private OnMediaGridClickListener mListener;
 
+    private Boolean selectViewVisible = true;
+
     public MediaGrid(Context context) {
         super(context);
         init(context);
@@ -130,6 +132,13 @@ public class MediaGrid extends SquareFrameLayout implements View.OnClickListener
 
     public void setOnMediaGridClickListener(OnMediaGridClickListener listener) {
         mListener = listener;
+    }
+
+    public void setSelectViewVisible(Boolean visible) {
+        selectViewVisible = visible;
+        if (!selectViewVisible) {
+            mCheckView.setVisibility(View.INVISIBLE);
+        }
     }
 
     public void removeOnMediaGridClickListener() {

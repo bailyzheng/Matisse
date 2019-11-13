@@ -61,6 +61,7 @@ public final class SelectionSpec {
     public String unSelectFullHint;
     public String defApplyText;
     public String applyText;
+    public boolean multiSelectable;
 
     private SelectionSpec() {
     }
@@ -101,6 +102,7 @@ public final class SelectionSpec {
         applyText = "Apply(%1$d)";
         forceSelectFull = false;
         unSelectFullHint = "You need to select " + maxSelectable + " items";
+        multiSelectable = false;
     }
 
     public boolean singleSelectionModeEnabled() {

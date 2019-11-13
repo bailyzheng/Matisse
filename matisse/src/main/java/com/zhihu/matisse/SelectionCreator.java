@@ -142,6 +142,11 @@ public final class SelectionCreator {
         return this;
     }
 
+    public SelectionCreator multiSelectable(boolean multiSelectable) {
+        mSelectionSpec.multiSelectable = multiSelectable;
+        return this;
+    }
+
     /**
      * Maximum selectable count.
      *

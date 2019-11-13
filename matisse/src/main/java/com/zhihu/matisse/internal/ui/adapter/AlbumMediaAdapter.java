@@ -15,6 +15,7 @@
  */
 package com.zhihu.matisse.internal.ui.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -22,12 +23,19 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.internal.entity.Album;
 import com.zhihu.matisse.internal.entity.Item;
@@ -36,6 +44,8 @@ import com.zhihu.matisse.internal.entity.IncapableCause;
 import com.zhihu.matisse.internal.model.SelectedItemCollection;
 import com.zhihu.matisse.internal.ui.widget.CheckView;
 import com.zhihu.matisse.internal.ui.widget.MediaGrid;
+
+import java.util.Date;
 
 public class AlbumMediaAdapter extends
         RecyclerViewCursorAdapter<RecyclerView.ViewHolder> implements
@@ -50,17 +60,22 @@ public class AlbumMediaAdapter extends
     private OnMediaClickListener mOnMediaClickListener;
     private RecyclerView mRecyclerView;
     private int mImageResize;
+    private Activity mActivity;
+    ImageView animView;
 
-    public AlbumMediaAdapter(Context context, SelectedItemCollection selectedCollection, RecyclerView recyclerView) {
+    public AlbumMediaAdapter(Activity activity, SelectedItemCollection selectedCollection, RecyclerView recyclerView) {
         super(null);
+        mActivity = activity;
         mSelectionSpec = SelectionSpec.getInstance();
         mSelectedCollection = selectedCollection;
 
-        TypedArray ta = context.getTheme().obtainStyledAttributes(new int[]{R.attr.item_placeholder});
+        TypedArray ta = activity.getTheme().obtainStyledAttributes(new int[]{R.attr.item_placeholder});
         mPlaceholder = ta.getDrawable(0);
         ta.recycle();
 
         mRecyclerView = recyclerView;
+        animView = new ImageView(mActivity);
+        animView.setScaleType(ImageView.ScaleType.FIT_XY);
     }
 
     @Override
@@ -121,6 +136,9 @@ public class AlbumMediaAdapter extends
             ));
             mediaViewHolder.mMediaGrid.bindMedia(item);
             mediaViewHolder.mMediaGrid.setOnMediaGridClickListener(this);
+            if (!mSelectionSpec.countable && mSelectionSpec.multiSelectable) {
+                mediaViewHolder.mMediaGrid.setSelectViewVisible(false);
+            }
             setCheckStatus(item, mediaViewHolder.mMediaGrid);
         }
     }
@@ -159,12 +177,16 @@ public class AlbumMediaAdapter extends
 
     @Override
     public void onThumbnailClicked(ImageView thumbnail, Item item, RecyclerView.ViewHolder holder) {
-        if (mSelectionSpec.showPreview) {
-            if (mOnMediaClickListener != null) {
-                mOnMediaClickListener.onMediaClick(null, item, holder.getAdapterPosition());
-            }
-        } else {
+        if (!mSelectionSpec.countable && mSelectionSpec.multiSelectable) {
             updateSelectedItem(item, holder);
+        } else {
+            if (mSelectionSpec.showPreview) {
+                if (mOnMediaClickListener != null) {
+                    mOnMediaClickListener.onMediaClick(null, item, holder.getAdapterPosition());
+                }
+            } else {
+                updateSelectedItem(item, holder);
+            }
         }
     }
 
@@ -186,12 +208,21 @@ public class AlbumMediaAdapter extends
                 notifyCheckStateChanged();
             }
         } else {
-            if (mSelectedCollection.isSelected(item)) {
+            if (!mSelectionSpec.multiSelectable && mSelectedCollection.isSelected(item)) {
                 mSelectedCollection.remove(item);
                 notifyCheckStateChanged();
             } else {
                 if (assertAddSelection(holder.itemView.getContext(), item)) {
+                    if (mSelectionSpec.multiSelectable) {
+                        item.selectTime = new Date().getTime();
+                    }
                     mSelectedCollection.add(item);
+                    int[] startLocation = new int[2];// 一个整型数组，用来存储按钮的在屏幕的X、Y坐标
+                    MediaViewHolder mediaViewHolder = (MediaViewHolder) holder;
+                    SelectionSpec.getInstance().imageEngine.loadThumbnail(mActivity, getImageResize(mediaViewHolder.mMediaGrid.getContext()),
+                            mPlaceholder, animView, item.getContentUri());
+                    holder.itemView.getLocationInWindow(startLocation);// 这是获取购买按钮的在屏幕的X、Y坐标（这也是动画开始的坐标）
+                    setAnim(animView, startLocation);
                     notifyCheckStateChanged();
                 }
             }
@@ -297,4 +328,90 @@ public class AlbumMediaAdapter extends
         }
     }
 
+    private ViewGroup anim_mask_layout;
+    private void setAnim(final View v, int[] startLocation) {
+        if (anim_mask_layout == null) {
+            anim_mask_layout = createAnimLayout();
+        }
+        anim_mask_layout.removeAllViews();
+        anim_mask_layout.addView(v);
+
+        final View view = addViewToAnimLayout(anim_mask_layout, v,
+                startLocation);
+        int[] endLocation = new int[2];// 存储动画结束位置的X、Y坐标
+        Display display = mActivity.getWindowManager().getDefaultDisplay();
+        int height = display.getHeight();
+        endLocation [0] = 100;
+        endLocation [1] = height - 100;
+
+        // 计算位移
+        int endX = 0 - startLocation[0] + 40;// 动画位移的X坐标
+        int endY = endLocation[1] - startLocation[1];// 动画位移的y坐标
+        TranslateAnimation translateAnimationX = new TranslateAnimation(0,
+                endX, 0, 0);
+        translateAnimationX.setInterpolator(new LinearInterpolator());
+        translateAnimationX.setRepeatCount(0);// 动画重复执行的次数
+        translateAnimationX.setFillAfter(true);
+
+        TranslateAnimation translateAnimationY = new TranslateAnimation(0, 0,
+                0, endY);
+        translateAnimationY.setInterpolator(new AccelerateInterpolator());
+        translateAnimationY.setRepeatCount(0);// 动画重复执行的次数
+        translateAnimationX.setFillAfter(true);
+
+        final AnimationSet set = new AnimationSet(false);
+        set.setFillAfter(false);
+        set.addAnimation(translateAnimationY);
+        set.addAnimation(translateAnimationX);
+        set.setDuration(400);// 动画的执行时间
+        view.startAnimation(set);
+        // 动画监听事件
+        set.setAnimationListener(new Animation.AnimationListener() {
+            // 动画的开始
+            @Override
+            public void onAnimationStart(Animation animation) {
+                v.setVisibility(View.VISIBLE);
+                //    Log.e("动画","asdasdasdasd");
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                // TODO Auto-generated method stub
+            }
+
+            // 动画的结束
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                v.setVisibility(View.GONE);
+                set.cancel();
+                animation.cancel();
+            }
+        });
+    }
+
+    private ViewGroup createAnimLayout() {
+        ViewGroup rootView = (ViewGroup) mActivity.getWindow().getDecorView();
+        LinearLayout animLayout = new LinearLayout(mActivity);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        animLayout.setLayoutParams(lp);
+        animLayout.setId(Integer.MAX_VALUE);
+        animLayout.setBackgroundResource(android.R.color.transparent);
+        rootView.addView(animLayout);
+        return animLayout;
+    }
+
+    private View addViewToAnimLayout(final ViewGroup parent, final View view,
+                                     int[] location) {
+        int x = location[0];
+        int y = location[1];
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.leftMargin = x;
+        lp.topMargin = y;
+        view.setLayoutParams(lp);
+        return view;
+    }
 }

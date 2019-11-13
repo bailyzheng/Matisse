@@ -131,9 +131,9 @@
             android:gravity="center"
             android:background="@drawable/bg_ellipse_gradual"
             android:foreground="?selectableItemBackground"
-            android:paddingLeft="10dp"
+            android:paddingLeft="30dp"
             android:paddingTop="5dp"
-            android:paddingRight="10dp"
+            android:paddingRight="30dp"
             android:paddingBottom="5dp"
             android:textColor="?attr/bottomToolbar.apply.textColor"
             android:textSize="14sp" />

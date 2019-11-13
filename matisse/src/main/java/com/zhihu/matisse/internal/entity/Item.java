@@ -46,6 +46,7 @@ public class Item implements Parcelable {
     public final Uri uri;
     public final long size;
     public final long duration; // only for video, in ms
+    public long selectTime; // only for multi select, in ms
 
     private Item(long id, String mimeType, long size, long duration) {
         this.id = id;
@@ -62,6 +63,7 @@ public class Item implements Parcelable {
         this.uri = ContentUris.withAppendedId(contentUri, id);
         this.size = size;
         this.duration = duration;
+        this.selectTime = 0;
     }
 
     private Item(Parcel source) {
@@ -70,6 +72,7 @@ public class Item implements Parcelable {
         uri = source.readParcelable(Uri.class.getClassLoader());
         size = source.readLong();
         duration = source.readLong();
+        selectTime = source.readLong();
     }
 
     public static Item valueOf(Cursor cursor) {
@@ -91,6 +94,7 @@ public class Item implements Parcelable {
         dest.writeParcelable(uri, 0);
         dest.writeLong(size);
         dest.writeLong(duration);
+        dest.writeLong(selectTime);
     }
 
     public Uri getContentUri() {
@@ -126,7 +130,8 @@ public class Item implements Parcelable {
                 && (uri != null && uri.equals(other.uri)
                     || (uri == null && other.uri == null))
                 && size == other.size
-                && duration == other.duration;
+                && duration == other.duration
+                && selectTime == other.selectTime;
     }
 
     @Override
@@ -139,6 +144,7 @@ public class Item implements Parcelable {
         result = 31 * result + uri.hashCode();
         result = 31 * result + Long.valueOf(size).hashCode();
         result = 31 * result + Long.valueOf(duration).hashCode();
+        result = 31 * result + Long.valueOf(selectTime).hashCode();
         return result;
     }
 }

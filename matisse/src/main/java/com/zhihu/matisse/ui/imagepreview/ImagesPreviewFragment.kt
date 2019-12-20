@@ -9,6 +9,8 @@ import android.os.Message
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -66,29 +68,54 @@ class ImagesPreviewFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_images_preview, container, false)
-        recyclerView = rootView!!.findViewById(R.id.recyclerView)
-        initWidget()
-        return rootView
-//        TLog.v(TAG, "onCreateView")
-//        if (mViewContent != null) {
-//            val parent: ViewGroup? = mViewContent!!.parent as ViewGroup?
-//            parent?.removeView(mViewContent)
-//        } else {
-//            mViewContent = inflater.inflate(R.layout.fragment_images_preview, container, false)
-//        }
-//
-//        return mViewContent
+//        val rootView = inflater.inflate(R.layout.fragment_images_preview, container, false)
+//        recyclerView = rootView!!.findViewById(R.id.recyclerView)
+//        initWidget()
+//        return rootView
+        if (mViewContent != null) {
+            val parent: ViewGroup? = mViewContent!!.parent as ViewGroup?
+            parent?.removeView(mViewContent)
+        } else {
+            mViewContent = inflater.inflate(R.layout.fragment_images_preview, container, false)
+            initWidget()
+        }
+
+        return mViewContent
     }
     
     lateinit var imageReplaceHandler: ImageReplaceHandler
-    
+
+    var edit = false
     fun initWidget() {
-        val layoutManager = LinearLayoutManager(context)
-        layoutManager.orientation = LinearLayoutManager.HORIZONTAL
+        val btnEdit = mViewContent!!.findViewById<Button>(R.id.btn_edit)
+        btnEdit.setOnClickListener {
+            edit = !edit
+            if (edit) {
+                Toast.makeText(activity, "编辑模式", Toast.LENGTH_SHORT).show()
+                btnEdit.text = "完成"
+            } else {
+                Toast.makeText(activity, "已退出编辑模式", Toast.LENGTH_SHORT).show()
+                btnEdit.text = "编辑"
+            }
+        }
+
+        recyclerView = mViewContent!!.findViewById(R.id.recyclerView)
+        val layoutManager = object : LinearLayoutManager(activity,
+                HORIZONTAL, false) {
+            override fun canScrollVertically(): Boolean {
+                return !edit
+            }
+
+            override fun canScrollHorizontally(): Boolean {
+                return !edit
+            }
+        }
+//        val layoutManager = LinearLayoutManager(context)
+//        layoutManager.orientation = LinearLayoutManager.HORIZONTAL
         recyclerView.layoutManager = layoutManager
+        recyclerView.setItemViewCacheSize(10)
         imageReplaceHandler = ImageReplaceHandler(this)
-        val adapter = ImageRVAdapter(activity!!, mSelectedCollection, OnStartDragListener { viewHolder ->
+        val adapter = ImageRVAdapter(activity!!, this, mSelectedCollection, OnStartDragListener { viewHolder ->
             viewHolder?.let {
 //                stopPreview()
                 mItemTouchHelper.startDrag(it)
@@ -96,8 +123,8 @@ class ImagesPreviewFragment : Fragment() {
         }, imageReplaceHandler)
 
         recyclerView.adapter = adapter
-        mItemTouchHelper = ItemTouchHelper(MyItemTouchHelperCallback(adapter))
-        mItemTouchHelper.attachToRecyclerView(recyclerView)
+//        mItemTouchHelper = ItemTouchHelper(MyItemTouchHelperCallback(adapter))
+//        mItemTouchHelper.attachToRecyclerView(recyclerView)
         mSelectedCollection.addChangedListener(object : SelectChangedNotifier{
             override fun onChanged() {
                 adapter.notifyDataSetChanged()

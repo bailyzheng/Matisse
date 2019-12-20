@@ -40,6 +40,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yalantis.ucrop.UCrop;
+import com.yalantis.ucrop.UCropFragment;
+import com.yalantis.ucrop.UCropFragmentCallback;
 import com.zhihu.matisse.ui.imagepreview.ImageInfoItem;
 import com.zhihu.matisse.ui.imagepreview.ImagesPreviewFragment;
 import com.zhihu.matisse.R;
@@ -75,7 +78,7 @@ public class MatisseActivity extends AppCompatActivity implements
         AlbumCollection.AlbumCallbacks, AdapterView.OnItemSelectedListener,
         MediaSelectionFragment.SelectionProvider, View.OnClickListener,
         AlbumMediaAdapter.CheckStateListener, AlbumMediaAdapter.OnMediaClickListener,
-        AlbumMediaAdapter.OnPhotoCapture {
+        AlbumMediaAdapter.OnPhotoCapture, UCropFragmentCallback {
 
     public static final String EXTRA_RESULT_SELECTION = "extra_result_selection";
     public static final String EXTRA_RESULT_SELECTION_PATH = "extra_result_selection_path";
@@ -464,6 +467,26 @@ public class MatisseActivity extends AppCompatActivity implements
         if (mMediaStoreCompat != null) {
             mMediaStoreCompat.dispatchCaptureIntent(this, REQUEST_CODE_CAPTURE);
         }
+    }
+
+    private boolean mShowLoader;
+    @Override
+    public void loadingProgress(boolean showLoader) {
+        mShowLoader = showLoader;
+        supportInvalidateOptionsMenu();
+    }
+
+    @Override
+    public void onCropFinish(UCropFragment.UCropResult result) {
+        switch (result.mResultCode) {
+            case RESULT_OK:
+//                handleCropResult(result.mResultData);
+                break;
+            case UCrop.RESULT_ERROR:
+//                handleCropError(result.mResultData);
+                break;
+        }
+//        removeFragmentFromScreen();
     }
 
 }

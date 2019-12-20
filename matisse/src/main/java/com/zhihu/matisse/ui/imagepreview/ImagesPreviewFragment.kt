@@ -127,6 +127,7 @@ class ImagesPreviewFragment : Fragment() {
 //        mItemTouchHelper.attachToRecyclerView(recyclerView)
         mSelectedCollection.addChangedListener(object : SelectChangedNotifier{
             override fun onChanged() {
+                recyclerView.scrollToPosition(mSelectedCollection.count())
                 adapter.notifyDataSetChanged()
             }
         })
@@ -134,6 +135,18 @@ class ImagesPreviewFragment : Fragment() {
 
     fun onButtonPressed(uri: Uri) {
         listener?.onFragmentInteraction(uri)
+    }
+
+    fun export(()->Unit) {
+        (recyclerView.adapter as ImageRVAdapter).cropFragments.forEach {
+            it?.cropAndSaveImage()
+        }
+    }
+
+    fun getUriList() {
+        (recyclerView.adapter as ImageRVAdapter).cropFragments.forEach {
+            it.res
+        }
     }
 
     override fun onResume() {

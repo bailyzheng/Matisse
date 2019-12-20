@@ -18,6 +18,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCropActivity
+import com.yalantis.ucrop.UCropFragment
 import com.zhihu.matisse.R
 import com.zhihu.matisse.internal.model.SelectedItemCollection
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.IItemTouchHelperAdapter
@@ -27,8 +28,7 @@ import java.io.File
 class ImageRVAdapter(val activity: FragmentActivity, val fragment: Fragment, private val mSelectedCollection: SelectedItemCollection, val dragListener: OnStartDragListener, val handler: Handler?) : RecyclerView.Adapter<ImageRVAdapter.ImageHolder>()/*, IItemTouchHelperAdapter*/ {
     val TAG = ImageRVAdapter::class.java.simpleName
 
-    val cropFragments = arrayOfNulls<Fragment>(mSelectedCollection.currentMaxSelectable())
-    val views = arrayOfNulls<View>(mSelectedCollection.currentMaxSelectable())
+    val cropFragments = arrayOfNulls<UCropFragment>(mSelectedCollection.currentMaxSelectable())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
         return ImageHolder(LayoutInflater.from(activity).inflate(R.layout.item_image_matisse, parent, false))
@@ -57,16 +57,12 @@ class ImageRVAdapter(val activity: FragmentActivity, val fragment: Fragment, pri
                     .apply(options)
                     .into(holder.imageView)
             if (cropFragments[position] == null) {
-                val uCrop = UCrop.of(item.contentUri, Uri.fromFile(File(activity.cacheDir, "ucropout")))
+                val uCrop = UCrop.of(item.contentUri, Uri.fromFile(File(activity.externalCacheDir, "ucropout_$position.jpg")))
                 val options = UCrop.Options()
                 options.setHideBottomControls(true)
                 options.setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL)
                 uCrop.withOptions(options)
                 cropFragments[position] = uCrop.getFragment(uCrop.getIntent(activity).extras)
-
-                holder.fragment = cropFragments[position]
-            } else {
-                holder.fragment = cropFragments[position]
             }
         } else if (position == mSelectedCollection.count()) {
             Glide.with(activity)
@@ -154,41 +150,51 @@ class ImageRVAdapter(val activity: FragmentActivity, val fragment: Fragment, pri
             return
         }
 
-        Log.e(TAG, "onViewAttachedToWindow: position is ${position}, id is ${holder.flContainer.id}")
-        if (holder.fragment == null) {
-            Log.e(TAG, "null position is ${position}")
-            val item = if (position < mSelectedCollection.count()) mSelectedCollection.asList()[position] else null
-            if (item != null) {
-//                val uCrop = UCrop.of(item.contentUri, Uri.fromFile(File(activity.cacheDir, "ucropout")))
-//                val options = UCrop.Options()
-//                options.setHideBottomControls(true)
-//                options.setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL)
-//                uCrop.withOptions(options)
-//                holder.fragment = uCrop.getFragment(uCrop.getIntent(activity).extras)
-                holder.fragment = cropFragments[position]
-                if (holder.fragment!!.isAdded) {
-                    Log.e(TAG, "is Added")
-                    holder.flContainer.id = View.generateViewId()
-                    fragment.childFragmentManager.beginTransaction()
-                            .remove(holder.fragment!!)
-                            .replace(holder.flContainer.id, holder.fragment!!, "111")
-                            .commitAllowingStateLoss()
-                } else {
-                    holder.flContainer.id = View.generateViewId()
-                    fragment.childFragmentManager.beginTransaction()
-                            .replace(holder.flContainer.id, holder.fragment!!, "111")
-                            .commitAllowingStateLoss()
-                }
+        val item = if (position < mSelectedCollection.count()) mSelectedCollection.asList()[position] else null
+        if (item != null) {
+            holder.fragment = cropFragments[position]
+            if (holder.fragment!!.isAdded) {
+                Log.e(TAG, "is Added")
+                holder.flContainer.id = View.generateViewId()
+                val fm = fragment.childFragmentManager
+                fm.beginTransaction().remove(holder.fragment!!).commitAllowingStateLoss()
+                fm.executePendingTransactions()
             }
+            holder.flContainer.id = View.generateViewId()
+            fragment.childFragmentManager.beginTransaction()
+                    .add(holder.flContainer.id, holder.fragment!!, "111")
+                    .commitAllowingStateLoss()
         } else {
-            Log.e(TAG, "position is ${holder.adapterPosition}")
-            if (holder.adapterPosition >= mSelectedCollection.count()) {
-                fragment.childFragmentManager.beginTransaction()
-                        .remove(holder.fragment!!)
-                        .commitAllowingStateLoss()
-                holder.fragment = null
-            }
+            holder.flContainer.removeAllViews()
         }
+
+//        Log.e(TAG, "onViewAttachedToWindow: position is ${position}, id is ${holder.flContainer.id}")
+//        if (holder.fragment == null) {
+//            Log.e(TAG, "null position is ${position}")
+//            val item = if (position < mSelectedCollection.count()) mSelectedCollection.asList()[position] else null
+//            if (item != null) {
+//                holder.fragment = cropFragments[position]
+//                if (holder.fragment!!.isAdded) {
+//                    Log.e(TAG, "is Added")
+//                    holder.flContainer.id = View.generateViewId()
+//                    val fm = fragment.childFragmentManager
+//                    fm.beginTransaction().remove(holder.fragment!!).commitAllowingStateLoss()
+//                    fm.executePendingTransactions()
+//                }
+//                holder.flContainer.id = View.generateViewId()
+//                fragment.childFragmentManager.beginTransaction()
+//                        .add(holder.flContainer.id, holder.fragment!!, "111")
+//                        .commitAllowingStateLoss()
+//            }
+//        } else {
+//            Log.e(TAG, "position is ${holder.adapterPosition}")
+//            if (holder.adapterPosition >= mSelectedCollection.count()) {
+//                fragment.childFragmentManager.beginTransaction()
+//                        .remove(holder.fragment!!)
+//                        .commitAllowingStateLoss()
+//                holder.fragment = null
+//            }
+//        }
 
 //        if (holder.fragment == null) {
 //            Log.e(TAG, "null position is ${position}")

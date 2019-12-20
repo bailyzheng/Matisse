@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.Nullable;
+import androidx.arch.core.util.Function;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -63,10 +64,7 @@ import com.zhihu.matisse.internal.ui.widget.IncapableDialog;
 import com.zhihu.matisse.internal.utils.MediaStoreCompat;
 import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
-
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
-import com.zhihu.matisse.ui.imagepreview.SelectChangedNotifier;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +101,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private CheckRadioView mOriginal;
     private boolean mOriginalEnable;
 
-    private Fragment mPreviewFragment;
+    private ImagesPreviewFragment mPreviewFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -348,18 +346,25 @@ public class MatisseActivity extends AppCompatActivity implements
             intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             startActivityForResult(intent, REQUEST_CODE_PREVIEW);
         } else if (v.getId() == R.id.button_apply) {
-            if (mSpec.forceSelectFull && !mSelectedCollection.maxSelectableReached()) {
-                Toast.makeText(this, mSpec.unSelectFullHint, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Intent result = new Intent();
-            ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
-            result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
-            ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
-            result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
-            result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
-            setResult(RESULT_OK, result);
-            finish();
+//            if (mSpec.forceSelectFull && !mSelectedCollection.maxSelectableReached()) {
+//                Toast.makeText(this, mSpec.unSelectFullHint, Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//            Intent result = new Intent();
+//            ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
+//            result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
+//            ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
+//            result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
+//            result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
+//            setResult(RESULT_OK, result);
+//            finish();
+            Function<Integer, Integer> cb = new Function<Integer, Integer>() {
+                @Override
+                public Integer apply(Integer integer) {
+                    return integer;
+                }
+            };
+            mPreviewFragment.export();
         } else if (v.getId() == R.id.originalLayout) {
             int count = countOverMaxSize();
             if (count > 0) {

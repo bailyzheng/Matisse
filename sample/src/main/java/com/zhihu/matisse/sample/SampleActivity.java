@@ -22,6 +22,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,9 @@ import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.engine.impl.PicassoEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
+import com.zhihu.matisse.ui.imagepreview.CropSize;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SampleActivity extends AppCompatActivity implements View.OnClickListener {
@@ -107,6 +110,11 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                         .forResult(REQUEST_CODE_CHOOSE);
                 break;
             case R.id.dracula:
+                List<CropSize> sizeList = new ArrayList<>();
+                sizeList.add(new CropSize(100,100));
+                sizeList.add(new CropSize(200,100));
+                sizeList.add(new CropSize(300,300));
+                sizeList.add(new CropSize(500,300));
                 Matisse.from(SampleActivity.this)
                         .choose(MimeType.ofImage(), false)
                         .theme(R.style.Matisse_Black)
@@ -114,6 +122,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                         .multiSelectable(true)
                         .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                         .maxSelectable(9)
+                        .cropSizeList(sizeList)
                         .maxOriginalSize(10)
                         .showSingleMediaType(true)
                         .imageEngine(new GlideEngine())
@@ -123,7 +132,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                         .applyText("生成")
                         .autoHideToolbarOnSingleTap(true)
                         .forceSelectFull(true)
-                        .unSelectFullHint("你需要选择12张图片")
+                        .unSelectFullHint("你需要选择9张图片")
                         .forResult(REQUEST_CODE_CHOOSE);
                 break;
             case R.id.only_gif:

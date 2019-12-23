@@ -17,6 +17,7 @@
 package com.zhihu.matisse.internal.entity;
 
 import android.content.pm.ActivityInfo;
+import android.util.Size;
 
 import androidx.annotation.StyleRes;
 
@@ -27,6 +28,7 @@ import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.listener.OnCheckedListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
+import com.zhihu.matisse.ui.imagepreview.CropSize;
 
 import java.util.List;
 import java.util.Set;
@@ -62,6 +64,7 @@ public final class SelectionSpec {
     public String defApplyText;
     public String applyText;
     public boolean multiSelectable;
+    public List<CropSize> cropSizeList;
 
     private SelectionSpec() {
     }

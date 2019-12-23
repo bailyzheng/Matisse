@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:layout_gravity="center_horizontal"
-    android:layout_margin="5dp"
     >
 
     <TextView
@@ -18,27 +17,30 @@
         />
 
     <RelativeLayout
-        android:layout_width="150dp"
+        android:layout_width="160dp"
         android:layout_height="300dp"
         >
         <ImageView
             android:id="@+id/iv_selected_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            />
-
-        <ImageView
-            android:id="@+id/iv_selected_del"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_del_image"
+            android:layout_margin="5dp"
             />
 
         <FrameLayout
             android:id="@+id/fragment_container"
+            android:layout_margin="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
+        <ImageView
+            android:id="@+id/iv_selected_del"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_del_image"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            />
 
     </RelativeLayout>
 

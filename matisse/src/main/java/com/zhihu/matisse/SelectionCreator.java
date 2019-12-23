@@ -19,6 +19,8 @@ package com.zhihu.matisse;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Size;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,10 +35,12 @@ import com.zhihu.matisse.internal.entity.SelectionSpec;
 import com.zhihu.matisse.listener.OnCheckedListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
 import com.zhihu.matisse.ui.MatisseActivity;
+import com.zhihu.matisse.ui.imagepreview.CropSize;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -159,6 +163,11 @@ public final class SelectionCreator {
         if (mSelectionSpec.maxImageSelectable > 0 || mSelectionSpec.maxVideoSelectable > 0)
             throw new IllegalStateException("already set maxImageSelectable and maxVideoSelectable");
         mSelectionSpec.maxSelectable = maxSelectable;
+        return this;
+    }
+
+    public SelectionCreator cropSizeList(List<CropSize> sizeList) {
+        mSelectionSpec.cropSizeList = sizeList;
         return this;
     }
 

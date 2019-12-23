@@ -6,18 +6,22 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.util.Consumer
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.yalantis.ucrop.UCrop
+import com.yalantis.ucrop.UCropFragment
+import com.yalantis.ucrop.UCropFragmentCallback
 import com.zhihu.matisse.R
 import com.zhihu.matisse.internal.model.SelectedItemCollection
-import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.MyItemTouchHelperCallback
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.OnStartDragListener
 import java.io.Serializable
 
@@ -137,15 +141,30 @@ class ImagesPreviewFragment : Fragment() {
         listener?.onFragmentInteraction(uri)
     }
 
-    fun export(()->Unit) {
-        (recyclerView.adapter as ImageRVAdapter).cropFragments.forEach {
-            it?.cropAndSaveImage()
-        }
-    }
+    fun export(cb: Consumer<ArrayList<Uri>>) {
+        val cropFragments = (recyclerView.adapter as ImageRVAdapter).cropFragments
+        val resultArray = arrayOfNulls<Uri>(cropFragments.size)
+        for (i in cropFragments.indices){
+            cropFragments[i]?.setCallback(object : UCropFragmentCallback {
+                override fun loadingProgress(showLoader: Boolean) {
+                }
 
-    fun getUriList() {
-        (recyclerView.adapter as ImageRVAdapter).cropFragments.forEach {
-            it.res
+                override fun onCropFinish(result: UCropFragment.UCropResult?) {
+                    Log.e(TAG, "onCropFinish")
+                    resultArray[i] = result?.mResultData?.getParcelableExtra(UCrop.EXTRA_OUTPUT_URI)
+                    var finished = true
+                    for (j in resultArray.indices) {
+                        if (resultArray[j] == null) {
+                            finished = false
+                        }
+                    }
+                    if (finished) {
+                        Log.e(TAG, "all finished")
+                        cb.accept(resultArray.toList() as ArrayList<Uri>)
+                    }
+                }
+            })
+            cropFragments[i]?.cropAndSaveImage()
         }
     }
 

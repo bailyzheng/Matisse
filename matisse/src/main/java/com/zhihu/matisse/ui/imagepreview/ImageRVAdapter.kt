@@ -20,6 +20,7 @@ import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCropActivity
 import com.yalantis.ucrop.UCropFragment
 import com.zhihu.matisse.R
+import com.zhihu.matisse.internal.entity.SelectionSpec
 import com.zhihu.matisse.internal.model.SelectedItemCollection
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.IItemTouchHelperAdapter
 import com.zhihu.matisse.ui.imagepreview.ItemTouchHelper.OnStartDragListener
@@ -57,11 +58,17 @@ class ImageRVAdapter(val activity: FragmentActivity, val fragment: Fragment, pri
                     .apply(options)
                     .into(holder.imageView)
             if (cropFragments[position] == null) {
+                val mSpec = SelectionSpec.getInstance()
+                val cropSizeList = mSpec.cropSizeList
+                val cropSize = if (cropSizeList.size > position) cropSizeList[position] else null
                 val uCrop = UCrop.of(item.contentUri, Uri.fromFile(File(activity.externalCacheDir, "ucropout_$position.jpg")))
                 val options = UCrop.Options()
                 options.setHideBottomControls(true)
                 options.setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL)
                 uCrop.withOptions(options)
+                cropSize ?. let {
+                    uCrop.withAspectRatio(cropSize.width.toFloat(), cropSize.height.toFloat())
+                }
                 cropFragments[position] = uCrop.getFragment(uCrop.getIntent(activity).extras)
             }
         } else if (position == mSelectedCollection.count()) {
@@ -84,6 +91,7 @@ class ImageRVAdapter(val activity: FragmentActivity, val fragment: Fragment, pri
         }
 
         holder.btnDel.setOnClickListener {
+            cropFragments[position] = null
             mSelectedCollection.remove(item)
             notifyItemRemoved(position)
         }

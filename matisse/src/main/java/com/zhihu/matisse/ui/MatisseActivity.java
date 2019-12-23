@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
+import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -358,13 +359,19 @@ public class MatisseActivity extends AppCompatActivity implements
 //            result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
 //            setResult(RESULT_OK, result);
 //            finish();
-            Function<Integer, Integer> cb = new Function<Integer, Integer>() {
+            mPreviewFragment.export(new Consumer<ArrayList<Uri>>() {
                 @Override
-                public Integer apply(Integer integer) {
-                    return integer;
+                public void accept(ArrayList<Uri> uris) {
+                    Intent result = new Intent();
+                    ArrayList<Uri> selectedUris = (ArrayList<Uri>) uris;
+                    result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
+                    ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
+                    result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
+                    result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
+                    setResult(RESULT_OK, result);
+                    finish();
                 }
-            };
-            mPreviewFragment.export();
+            });
         } else if (v.getId() == R.id.originalLayout) {
             int count = countOverMaxSize();
             if (count > 0) {

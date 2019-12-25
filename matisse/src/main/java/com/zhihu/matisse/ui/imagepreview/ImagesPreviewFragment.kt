@@ -80,7 +80,7 @@ class ImagesPreviewFragment : Fragment() {
             val parent: ViewGroup? = mViewContent!!.parent as ViewGroup?
             parent?.removeView(mViewContent)
         } else {
-            mViewContent = inflater.inflate(R.layout.fragment_images_preview, container, false)
+            mViewContent = inflater.inflate(R.layout.matisse_fragment_images_preview, container, false)
             initWidget()
         }
 
@@ -160,7 +160,11 @@ class ImagesPreviewFragment : Fragment() {
                     }
                     if (finished) {
                         Log.e(TAG, "all finished")
-                        cb.accept(resultArray.toList() as ArrayList<Uri>)
+                        val retList = arrayListOf<Uri>()
+                        for (item in resultArray) {
+                            retList.add(item!!)
+                        }
+                        cb.accept(retList)
                     }
                 }
             })

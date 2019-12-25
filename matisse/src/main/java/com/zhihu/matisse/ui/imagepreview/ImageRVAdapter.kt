@@ -160,6 +160,8 @@ class ImageRVAdapter(val activity: FragmentActivity, val fragment: Fragment, pri
 
         val item = if (position < mSelectedCollection.count()) mSelectedCollection.asList()[position] else null
         if (item != null) {
+            holder.tvIndexView.visibility = View.INVISIBLE
+
             holder.fragment = cropFragments[position]
             if (holder.fragment!!.isAdded) {
                 Log.e(TAG, "is Added")

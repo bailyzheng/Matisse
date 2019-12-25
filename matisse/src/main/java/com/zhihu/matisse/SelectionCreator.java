@@ -377,6 +377,11 @@ public final class SelectionCreator {
         return this;
     }
 
+    public SelectionCreator setHelpUrl(String url) {
+        mSelectionSpec.helpUrl = url;
+        return this;
+    }
+
     /**
      * Start to select media and wait for result.
      *

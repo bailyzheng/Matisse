@@ -16,6 +16,7 @@
 package com.zhihu.matisse.ui;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -27,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.arch.core.util.Function;
 import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
@@ -35,6 +37,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -68,6 +71,7 @@ import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Main Activity to display albums and media content (images/videos) in each album
@@ -93,6 +97,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private AlbumsSpinner mAlbumsSpinner;
     private AlbumsAdapter mAlbumsAdapter;
     private TextView mButtonPreview;
+    private TextView mButtonHelp;
     private TextView mSelectHint;
     private TextView mButtonApply;
     private View mContainer;
@@ -140,9 +145,19 @@ public class MatisseActivity extends AppCompatActivity implements
         navigationIcon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
+        mButtonHelp = (TextView) findViewById(R.id.button_help);
         mSelectHint = (TextView) findViewById(R.id.tv_select_hint);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
-        mButtonPreview.setOnClickListener(this);
+        if (mSpec.showPreview) {
+            mButtonPreview.setOnClickListener(this);
+        } else {
+            mButtonPreview.setVisibility(View.GONE);
+        }
+        if (mSpec.helpUrl == null) {
+            mButtonHelp.setVisibility(View.GONE);
+        } else {
+            mButtonHelp.setOnClickListener(this);
+        }
         mButtonApply.setOnClickListener(this);
         mContainer = findViewById(R.id.container);
         mEmptyView = findViewById(R.id.empty_view);
@@ -205,7 +220,7 @@ public class MatisseActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            ifQuit();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -347,10 +362,10 @@ public class MatisseActivity extends AppCompatActivity implements
             intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             startActivityForResult(intent, REQUEST_CODE_PREVIEW);
         } else if (v.getId() == R.id.button_apply) {
-//            if (mSpec.forceSelectFull && !mSelectedCollection.maxSelectableReached()) {
-//                Toast.makeText(this, mSpec.unSelectFullHint, Toast.LENGTH_SHORT).show();
-//                return;
-//            }
+            if (mSpec.forceSelectFull && !mSelectedCollection.maxSelectableReached()) {
+                Toast.makeText(this, mSpec.unSelectFullHint, Toast.LENGTH_SHORT).show();
+                return;
+            }
 //            Intent result = new Intent();
 //            ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
 //            result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
@@ -359,18 +374,19 @@ public class MatisseActivity extends AppCompatActivity implements
 //            result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
 //            setResult(RESULT_OK, result);
 //            finish();
-            mPreviewFragment.export(new Consumer<ArrayList<Uri>>() {
-                @Override
-                public void accept(ArrayList<Uri> uris) {
-                    Intent result = new Intent();
-                    ArrayList<Uri> selectedUris = (ArrayList<Uri>) uris;
-                    result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
-                    ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
-                    result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
-                    result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
-                    setResult(RESULT_OK, result);
-                    finish();
+
+            mPreviewFragment.export(uris -> {
+                Intent result = new Intent();
+                ArrayList<Uri> selectedUris = uris;
+                result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
+                ArrayList<String> selectedPaths = new ArrayList<>();
+                for (Uri item : selectedUris) {
+                    selectedPaths.add(PathUtils.getPath(this, item));
                 }
+                result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
+                result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
+                setResult(RESULT_OK, result);
+                finish();
             });
         } else if (v.getId() == R.id.originalLayout) {
             int count = countOverMaxSize();
@@ -388,6 +404,14 @@ public class MatisseActivity extends AppCompatActivity implements
             if (mSpec.onCheckedListener != null) {
                 mSpec.onCheckedListener.onCheck(mOriginalEnable);
             }
+        } else if (v.getId() == R.id.button_help) {
+            Intent intent = new Intent(this, FmkWebViewActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("hideTitle", false);
+            bundle.putString("title", "使用帮助");
+            bundle.putString("url", mSpec.helpUrl);
+            intent.putExtras(bundle);
+            startActivity(intent);
         }
     }
 
@@ -499,6 +523,29 @@ public class MatisseActivity extends AppCompatActivity implements
                 break;
         }
 //        removeFragmentFromScreen();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        ifQuit();
+        return super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            ifQuit();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    void ifQuit() {
+        new AlertDialog.Builder(this)
+                .setMessage("确定要退出吗？")
+                .setPositiveButton("确定", (dialogInterface, i) -> onBackPressed())
+                .setNegativeButton("取消", null)
+                .create()
+                .show();
     }
 
 }

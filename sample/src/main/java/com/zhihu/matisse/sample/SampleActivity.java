@@ -22,26 +22,21 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
-import com.zhihu.matisse.engine.impl.PicassoEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 import com.zhihu.matisse.ui.imagepreview.CropSize;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,6 +128,8 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                         .autoHideToolbarOnSingleTap(true)
                         .forceSelectFull(true)
                         .unSelectFullHint("你需要选择9张图片")
+                        .showPreview(false)
+                        .setHelpUrl("https://www.baidu.com/")
                         .forResult(REQUEST_CODE_CHOOSE);
                 break;
             case R.id.only_gif:

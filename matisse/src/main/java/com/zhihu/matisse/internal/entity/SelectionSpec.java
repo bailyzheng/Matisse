@@ -65,6 +65,7 @@ public final class SelectionSpec {
     public String applyText;
     public boolean multiSelectable;
     public List<CropSize> cropSizeList;
+    public String helpUrl;
 
     private SelectionSpec() {
     }

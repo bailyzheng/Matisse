@@ -1,0 +1,3 @@
+[submodule "uCrop"]
+	path = uCrop
+	url = git@github.com:bailyzheng/uCrop.git

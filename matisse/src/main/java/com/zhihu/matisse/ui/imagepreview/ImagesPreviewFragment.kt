@@ -1,5 +1,6 @@
 package com.zhihu.matisse.ui.imagepreview
 
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -151,7 +152,11 @@ class ImagesPreviewFragment : Fragment() {
 
                 override fun onCropFinish(result: UCropFragment.UCropResult?) {
                     Log.e(TAG, "onCropFinish")
-                    resultArray[i] = result?.mResultData?.getParcelableExtra(UCrop.EXTRA_OUTPUT_URI)
+                    if (result?.mResultCode == RESULT_OK) {
+                        resultArray[i] = result?.mResultData?.getParcelableExtra(UCrop.EXTRA_OUTPUT_URI)
+                    } else {
+                        resultArray[i] = mSelectedCollection.asListOfUri()[i]
+                    }
                     var finished = true
                     for (j in resultArray.indices) {
                         if (resultArray[j] == null) {

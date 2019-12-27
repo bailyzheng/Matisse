@@ -65,6 +65,8 @@ import com.zhihu.matisse.internal.utils.MediaStoreCompat;
 import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 import com.zhihu.matisse.internal.utils.SingleMediaScanner;
+import com.zhihu.matisse.ui.imagepreview.TransSupportWaitDialogFragment;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -370,6 +372,8 @@ public class MatisseActivity extends AppCompatActivity implements
 //            setResult(RESULT_OK, result);
 //            finish();
 
+            showWaitDialog("");
+            mButtonApply.setClickable(false);
             mPreviewFragment.export(uris -> {
                 Intent result = new Intent();
                 ArrayList<Uri> selectedUris = uris;
@@ -381,6 +385,8 @@ public class MatisseActivity extends AppCompatActivity implements
                 result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
                 result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
                 setResult(RESULT_OK, result);
+                mButtonApply.setClickable(true);
+                hideWaitDialog();
                 finish();
             });
         } else if (v.getId() == R.id.originalLayout) {
@@ -543,4 +549,23 @@ public class MatisseActivity extends AppCompatActivity implements
                 .show();
     }
 
+    private TransSupportWaitDialogFragment mDialog = null;
+    TransSupportWaitDialogFragment showWaitDialog(String message) {
+        if (mDialog == null) {
+            mDialog = new TransSupportWaitDialogFragment();
+        }
+        mDialog.show(getSupportFragmentManager(), "TransWaitDialogFragment");
+
+        return mDialog;
+    }
+    void hideWaitDialog() {
+        if (mDialog != null) {
+            try {
+                mDialog.dismiss();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            mDialog = null;
+        }
+    }
 }
